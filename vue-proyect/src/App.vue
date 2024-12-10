@@ -132,7 +132,7 @@ export default {
         console.error('Error al obtener los proyectos:', error);
       }
     },
-    async saveProjectToServer(project) {
+    async addProject(project) {
       try {
          const response = await axios.post(`${backendUrl}/add`, project);
          console.log('Respuesta del servidor:', response.data);  // Agregar esta línea para ver la respuesta completa
@@ -160,7 +160,7 @@ export default {
     },
     async initializeProjects() {
       for (const project of this.projects) {
-        await this.saveProjectToServer(project);
+        await this.addProject(project);
       }
     },
     async editProject(updatedProject) {
