@@ -134,9 +134,10 @@ export default {
     },
     async saveProjectToServer(project) {
       try {
-        await axios.post(`${backendUrl}/add`, project);
+         const response = await axios.post(`${backendUrl}/add`, project);
+         console.log('Respuesta del servidor:', response.data);  // Agregar esta línea para ver la respuesta completa
       } catch (error) {
-        console.error('Error al guardar el proyecto en el servidor:', error);
+         console.error('Error al guardar el proyecto en el servidor:', error);
       }
     },
     async deleteProject(projectId) {
