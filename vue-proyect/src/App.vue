@@ -65,13 +65,13 @@
 
 
 <script>
-import { api } from '@/config/api';  // Importa la configuración de la API
 import programadores from '@/assets/programadores.png';
 import dataSciences from '@/assets/dataSciences.png';
 import ProyectosContainer from '@/components/ProyectosContainer.vue';
 import img4 from '@/assets/aa_recorte.png';
 import img5 from '@/assets/carpeta.png';
 import img6 from '@/assets/threads.jpg';
+import axios from 'axios';
 
 export default {
   name: "App",
@@ -87,24 +87,27 @@ export default {
           id: '1',
           titulo: 'Aprendizaje Automático. Reducción de Dimensionalidad',
           imagen: img4,
-          descripcion: 'En esta práctica de reducción de dimensionalidad, se aplicó inicialmente PCA (Análisis de Componentes Principales) al dataset de fuga de clientes de una empresa telefónica...',
-          conclusion: 'La reducción de dimensionalidad es una técnica fundamental en el análisis de datos, especialmente cuando se trabaja con conjuntos de datos de alta dimensionalidad...',
+          descripcion: 'En esta práctica de reducción de dimensionalidad, se aplicó inicialmente PCA (Análisis de Componentes Principales) al dataset de fuga de clientes de una empresa telefónica, utilizado previamente en la práctica 3. PCA tiene como objetivo reducir las dimensiones del conjunto de datos al proyectarlo en un espacio de menor dimensión, maximizando la varianza. Se comenzó estandarizando las variables para evitar que aquellas con mayores rangos influyeran de manera desproporcionada en los resultados.',
+          conclusion: 'La reducción de dimensionalidad es una técnica fundamental en el análisis de datos, especialmente cuando se trabaja con conjuntos de datos de alta dimensionalidad. El uso de PCA y LDA no solo permite simplificar la visualización de datos, sino que también puede mejorar el rendimiento de los modelos de aprendizaje automático. Estos resultados destacan la importancia de la preparación y el preprocesamiento de datos en el análisis de datos, ya que influye en gran medida en la efectividad de los algoritmos utilizados.',
         },
         {
           id: '2',
           titulo: 'Base de Datos. Gestión y Consultas de Películas con pgAdmin',
           imagen: img5,
-          descripcion: 'En este proyecto de bases de datos, se utilizó la herramienta pgAdmin para gestionar un conjunto de datos sobre películas...',
-          conclusion: 'Gracias a pgAdmin, fue posible manejar sin problemas una base de datos compleja con varias tablas y relaciones...',
-        },
-        {
-          id: '3',
-          titulo: 'Solución del Problema SAT usando Threads en Java',
-          imagen: img6,
-          descripcion: 'En este proyecto, se implementó una solución al problema de satisfacibilidad booleana (SAT) utilizando Java y la programación con threads...',
-          conclusion: 'El uso de threads en Java para resolver el problema SAT, combinado con la implementación de clases como Clause, CNF, y SAT, permitió una mejora notable en la eficiencia...',
-        }
-      ]
+          descripcion:
+            'En este proyecto de bases de datos, se utilizó la herramienta pgAdmin para gestionar un conjunto de datos sobre películas. El proceso comenzó con la creación de un esquema relacional que incluía información clave como los detalles de las películas, el reparto, los géneros, los países de producción, las compañías productoras, y las valoraciones de los usuarios.',
+          
+          conclusion: 'Gracias a pgAdmin, fue posible manejar sin problemas una base de datos compleja con varias tablas y relaciones. Las consultas SQL realizadas ayudaron a obtener información útil sobre el catálogo de películas, el reparto y las valoraciones de los usuarios, haciendo más fácil el análisis y la obtención de datos importantes para el mundo del cine.',
+          },
+          {
+            id: '3',
+            titulo: 'Solución del Problema SAT usando Threads en Java',
+            imagen: img6,
+            descripcion:
+              'En este proyecto, se implementó una solución al problema de satisfacibilidad booleana (SAT) utilizando Java y la programación con threads. El objetivo fue mejorar la eficiencia en la resolución de instancias grandes del problema mediante la paralelización del proceso. Para estructurar la solución, se desarrollaron varias clases en Java, como Clause, CNF, y SAT, encargadas de representar los diferentes elementos del problema.',
+            conclusion: 'El uso de threads en Java para resolver el problema SAT, combinado con la implementación de clases como Clause, CNF, y SAT, permitió una mejora notable en la eficiencia del programa. Al distribuir el trabajo entre múltiples hilos y estructurar el problema de forma clara con las clases Java, se logró reducir el tiempo de ejecución en instancias grandes del problema SAT.',
+          },
+        ]
     };
   },
   watch: {
@@ -118,9 +121,11 @@ export default {
   methods: {
     async fetchProjects() {
       try {
-        const response = await api.get('/getProjects'); // Usamos la ruta relativa ya que la baseURL ya está configurada
+        const response = await axios.get('http://localhost:9000/getProjects'); 
+        
+
         if (!response.data.resultado || response.data.resultado.length === 0) {
-          await this.initializeProjects(); // Llama al método initializeProjects si no hay proyectos
+          await this.initializeProjects(); // Llama al método initializeProjects
         }
         this.projects = response.data.resultado;
       } catch (error) {
@@ -133,14 +138,14 @@ export default {
     },
     async saveProjectToServer(project) {
       try {
-        await api.post('/add', project); // Guardar el proyecto en el servidor usando la ruta relativa
+        await axios.post('http://localhost:9000/add', project); // Guardar en el servidor
       } catch (error) {
         console.error('Error al guardar el proyecto en el servidor:', error);
       }
     },
     async deleteProject(projectId) {
       try {
-        await api.delete('/delete', { data: { id: projectId } });
+        await axios.delete('http://localhost:9000/delete', { data: { id: projectId } });
         this.projects = this.projects.filter(project => project.id !== projectId);
       } catch (error) {
         console.error('Error al eliminar el proyecto:', error);
@@ -155,15 +160,16 @@ export default {
       if (this.searchQuery.trim() === '') return; // No hacer nada si el campo de búsqueda está vacío
 
       try {
-        const response = await api.get('/get', { params: { titulo: this.searchQuery } });
+        const response = await axios.get(`http://localhost:9000/get`, { params: { titulo: this.searchQuery } });
         this.projects = response.data.resultado || null; 
       } catch (error) {
         console.error('Error al buscar el proyecto:', error);
+        
       }
     },
     async editProject(updatedProject) {
       try {
-        await api.put('/edit', updatedProject); // Llama al endpoint para actualizar el proyecto usando la ruta relativa
+        await axios.put('http://localhost:9000/edit', updatedProject); // Llama al endpoint para actualizar el proyecto
         const index = this.projects.findIndex(project => project.id === updatedProject.id);
         if (index !== -1) {
           // Actualiza el proyecto en la lista local
@@ -173,9 +179,11 @@ export default {
         console.error('Error al editar el proyecto:', error);
       }
     }
+  
   },
   created() {
-    this.fetchProjects();  // Llamamos a fetchProjects cuando el componente se cree
+    this.fetchProjects(); 
+    
   }
 }
 </script>
