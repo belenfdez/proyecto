@@ -136,6 +136,7 @@ export default {
       try {
          const response = await axios.post(`${backendUrl}/add`, project);
          console.log('Respuesta del servidor:', response.data);  // Agregar esta línea para ver la respuesta completa
+        await this.fetchProjects();
       } catch (error) {
          console.error('Error al guardar el proyecto en el servidor:', error);
       }
