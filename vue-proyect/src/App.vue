@@ -73,6 +73,8 @@ import img5 from '@/assets/carpeta.png';
 import img6 from '@/assets/threads.jpg';
 import axios from 'axios';
 
+const backendUrl = 'https://backend-wdn4.onrender.com';
+  
 export default {
   name: "App",
   components: { ProyectosContainer },
@@ -121,34 +123,38 @@ export default {
   methods: {
     async fetchProjects() {
       try {
-        const response = await axios.get('http://localhost:9000/getProjects'); 
-        
-
+        const response = await axios.get(`${backendUrl}/getProjects`);
         if (!response.data.resultado || response.data.resultado.length === 0) {
-          await this.initializeProjects(); // Llama al método initializeProjects
+          await this.initializeProjects();
         }
         this.projects = response.data.resultado;
       } catch (error) {
         console.error('Error al obtener los proyectos:', error);
       }
     },
-    addProject(newProject) {
-      this.projects.push(newProject); 
-      this.saveProjectToServer(newProject);
-    },
     async saveProjectToServer(project) {
       try {
-        await axios.post('http://localhost:9000/add', project); // Guardar en el servidor
+        await axios.post(`${backendUrl}/add`, project);
       } catch (error) {
         console.error('Error al guardar el proyecto en el servidor:', error);
       }
     },
     async deleteProject(projectId) {
       try {
-        await axios.delete('http://localhost:9000/delete', { data: { id: projectId } });
+        await axios.delete(`${backendUrl}/delete`, { data: { id: projectId } });
         this.projects = this.projects.filter(project => project.id !== projectId);
       } catch (error) {
         console.error('Error al eliminar el proyecto:', error);
+      }
+    },
+    async searchProject() {
+      if (this.searchQuery.trim() === '') return;
+
+      try {
+        const response = await axios.get(`${backendUrl}/get`, { params: { titulo: this.searchQuery } });
+        this.projects = response.data.resultado || null;
+      } catch (error) {
+        console.error('Error al buscar el proyecto:', error);
       }
     },
     async initializeProjects() {
@@ -156,30 +162,17 @@ export default {
         await this.saveProjectToServer(project);
       }
     },
-    async searchProject() {
-      if (this.searchQuery.trim() === '') return; // No hacer nada si el campo de búsqueda está vacío
-
-      try {
-        const response = await axios.get(`http://localhost:9000/get`, { params: { titulo: this.searchQuery } });
-        this.projects = response.data.resultado || null; 
-      } catch (error) {
-        console.error('Error al buscar el proyecto:', error);
-        
-      }
-    },
     async editProject(updatedProject) {
       try {
-        await axios.put('http://localhost:9000/edit', updatedProject); // Llama al endpoint para actualizar el proyecto
+        await axios.put(`${backendUrl}/edit`, updatedProject);
         const index = this.projects.findIndex(project => project.id === updatedProject.id);
         if (index !== -1) {
-          // Actualiza el proyecto en la lista local
           this.projects.splice(index, 1, updatedProject);
         }
       } catch (error) {
         console.error('Error al editar el proyecto:', error);
       }
     }
-  
   },
   created() {
     this.fetchProjects(); 
